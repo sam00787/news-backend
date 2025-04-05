@@ -1,41 +1,26 @@
-from flask import Flask, request, jsonify
-import feedparser
+from flask import Flask, jsonify, request
+from flask_cors import CORS  # <-- Add this import
 
 app = Flask(__name__)
 
-# Example RSS Feeds (Add more as needed)
-RSS_FEEDS = {
-    'world': 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-    'technology': 'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',
-    'sports': 'https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml',
-    'health': 'https://rss.nytimes.com/services/xml/rss/nyt/Health.xml',
-}
+# Allow CORS for all origins (you can specify domains here)
+CORS(app)
 
-
-@app.route('/news/')
+@app.route("/news/")
 def get_news():
-    category = request.args.get('category', 'world')
-    search = request.args.get('search', '')
+    category = request.args.get('category')
+    search = request.args.get('search')
 
-    feed_url = RSS_FEEDS.get(category, RSS_FEEDS['world'])
-    feed = feedparser.parse(feed_url)
+    # Example data, replace with actual fetching logic
+    news_data = [
+        {"title": f"{search} News 1", "summary": "Summary of news 1"},
+        {"title": f"{search} News 2", "summary": "Summary of news 2"},
+    ]
+    
+    return jsonify(news_data)
 
-    results = []
-    for entry in feed.entries:
-        if search.lower() in entry.title.lower() or search.lower() in entry.summary.lower():
-            summary = summarize(entry.summary)
-            results.append({
-                'title': entry.title,
-                'summary': summary
-            })
-
-    return jsonify(results)
-
-
-def summarize(text):
-    sentences = text.split('. ')
-    summary = '. '.join(sentences[:5]) + '...'
-    return summary
+if __name__ == "__main__":
+    app.run(debug=True)
 
 
 if __name__ == '__main__':
